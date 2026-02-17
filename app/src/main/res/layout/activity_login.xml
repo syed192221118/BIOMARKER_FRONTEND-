@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Activity Login Layout
+    Purpose: Provides a role selection screen where users can choose to log in as a Doctor or a Patient.
+    Background: Soft blue/grey (#F5F7FB)
+    Structure: Scrollable vertical layout with card-based options for role selection.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F7FB">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
+
+        <!-- Header Section: Explains the purpose of the screen -->
+        <TextView
+            android:text="Who are you?"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textColor="#1E1E1E"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:text="Select your role to continue to the appropriate dashboard."
+            android:textSize="14sp"
+            android:textColor="#7A7A7A"
+            android:gravity="center"
+            android:layout_marginTop="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- Doctor Selection Card: Entry point for healthcare professionals -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:layout_marginTop="36dp"
+            android:background="@drawable/card_bg"
+            android:elevation="6dp"
+            android:gravity="center">
+
+            <LinearLayout
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:background="@drawable/icon_bg_blue"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@android:drawable/ic_menu_info_details"/>
+            </LinearLayout>
+
+            <TextView
+                android:text="Doctor"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#1E1E1E"
+                android:layout_marginTop="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Access patient records, analytics, and AI risk assessments."
+                android:textSize="14sp"
+                android:textColor="#6F6F6F"
+                android:gravity="center"
+                android:layout_marginTop="6dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- Patient Selection Card: Entry point for general users -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:layout_marginTop="22dp"
+            android:background="@drawable/card_bg"
+            android:elevation="6dp"
+            android:gravity="center">
+
+            <LinearLayout
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:background="@drawable/icon_bg_green"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@android:drawable/ic_menu_myplaces"/>
+            </LinearLayout>
+
+            <TextView
+                android:text="Patient"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#1E1E1E"
+                android:layout_marginTop="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Track your health, view reports, and receive personalized tips."
+                android:textSize="14sp"
+                android:textColor="#6F6F6F"
+                android:gravity="center"
+                android:layout_marginTop="6dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

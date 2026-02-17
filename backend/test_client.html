@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiomarkerAI Backend Tester</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
+        .card { border: 1px solid #ccc; padding: 1.5rem; margin-bottom: 1.5rem; border-radius: 8px; background: #f9f9f9; }
+        h2 { margin-top: 0; }
+        input, button { padding: 0.5rem; margin: 0.25rem 0; }
+        button { cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        pre { background: #eee; padding: 1rem; overflow-x: auto; border-radius: 4px; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>backend Verification Dashboard</h1>
+    <p>Open the console (F12) for detailed logs.</p>
+
+    <!-- 1. Register -->
+    <div class="card">
+        <h2>1. Register</h2>
+        <input type="text" id="reg-username" placeholder="Username">
+        <input type="email" id="reg-email" placeholder="Email">
+        <input type="password" id="reg-password" placeholder="Password">
+        <button onclick="register()">Register</button>
+        <div id="reg-result"></div>
+    </div>
+
+    <!-- 2. Login -->
+    <div class="card">
+        <h2>2. Login</h2>
+        <input type="text" id="login-username" placeholder="Username">
+        <input type="password" id="login-password" placeholder="Password">
+        <button onclick="login()">Login & Get Token</button>
+        <div id="login-result"></div>
+    </div>
+
+    <!-- 3. Get Biomarkers -->
+    <div class="card">
+        <h2>3. Get Biomarkers (Public)</h2>
+        <button onclick="getBiomarkers()">Fetch Biomarkers</button>
+        <pre id="biomarkers-result"></pre>
+    </div>
+
+    <!-- 4. Profile -->
+    <div class="card">
+        <h2>4. Get Profile (Protected)</h2>
+        <button onclick="getProfile()">Fetch My Profile</button>
+        <div id="profile-result"></div>
+    </div>
+
+    <!-- 5. Analyze -->
+    <div class="card">
+        <h2>5. Analyze Mock Data (Protected)</h2>
+        <button onclick="analyze()">Run Analysis</button>
+        <pre id="analyze-result"></pre>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://127.0.0.1:8000/api';
+        let accessToken = localStorage.getItem('access_token');
+
+        function log(elementId, message, isError = false) {
+            const el = document.getElementById(elementId);
+            el.textContent = typeof message === 'object' ? JSON.stringify(message, null, 2) : message;
+            el.className = isError ? 'error' : 'success';
+        }
+
+        async function register() {
+            const username = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                const res = await fetch(`${BASE_URL}/register/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+                const data = await res.json();
+                if (res.ok) log('reg-result', 'Registration Successful! Now try logging in.');
+                else log('reg-result', data, true);
+            } catch (e) { log('reg-result', e.message, true); }
+        }
+
+        async function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const res = await fetch(`${BASE_URL}/login/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    accessToken = data.access;
+                    localStorage.setItem('access_token', accessToken);
+                    log('login-result', 'Login Successful! Token saved.');
+                } else {
+                    log('login-result', data, true);
+                }
+            } catch (e) { log('login-result', e.message, true); }
+        }
+
+        async function getBiomarkers() {
+            try {
+                const res = await fetch(`${BASE_URL}/biomarkers/`);
+                const data = await res.json();
+                log('biomarkers-result', data);
+            } catch (e) { log('biomarkers-result', e.message, true); }
+        }
+
+        async function getProfile() {
+            if (!accessToken) return log('profile-result', 'Not logged in', true);
+            try {
+                const res = await fetch(`${BASE_URL}/me/`, {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                const data = await res.json();
+                log('profile-result', data);
+            } catch (e) { log('profile-result', e.message, true); }
+        }
+
+        async function analyze() {
+            if (!accessToken) return log('analyze-result', 'Not logged in', true);
+            try {
+                const res = await fetch(`${BASE_URL}/process/`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        readings_input: [
+                            { biomarker_id: 1, value: 120 }, // Mock Glucose
+                            { biomarker_id: 2, value: 100 }  // Mock LDL
+                        ]
+                    })
+                });
+                const data = await res.json();
+                log('analyze-result', data);
+            } catch (e) { log('analyze-result', e.message, true); }
+        }
+    </script>
+</body>
+</html>
