@@ -130,6 +130,7 @@ fun BookAppointmentScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             // Appointment Type Cards
+            //
             AppointmentTypeCard(
                 title = "In-Person Visit",
                 description = "Visit a doctor at the clinic for a physical checkup.",
