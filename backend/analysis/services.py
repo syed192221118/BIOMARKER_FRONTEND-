@@ -1,5 +1,34 @@
 class AIService:
     @staticmethod
+    def run_full_analysis(screening):
+        """
+        Calculates risk scores, saves AIAnalysisResult, and generates a Medical Report.
+        """
+        from .models import AIAnalysisResult
+        from reports.utils import generate_medical_report
+
+        if not hasattr(screening, 'biomarker_panel'):
+            return None
+
+        # 1. Calculate Risk
+        results_data = AIService.calculate_risk(screening.biomarker_panel)
+
+        # 2. Save AI Result
+        result, created = AIAnalysisResult.objects.update_or_create(
+            screening=screening,
+            defaults=results_data
+        )
+
+        # 3. Update Screening Status
+        screening.status = 'Completed'
+        screening.save()
+
+        # 4. Generate PDF Report
+        generate_medical_report(screening)
+
+        return result
+
+    @staticmethod
     def calculate_risk(biomarker_panel):
         bp = biomarker_panel
         risk_score = 10

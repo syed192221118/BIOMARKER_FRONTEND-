@@ -1,0 +1,2 @@
+INFO 2026-02-18 14:50:43,920 utils User: test_doctor (ID: 7) | Action: ADD_BIOMARKERS | Detail: Screening ID: 2
+INFO 2026-02-18 14:51:49,993 utils User: test_doctor (ID: 7) | Action: ADD_BIOMARKERS | Detail: Screening ID: 3

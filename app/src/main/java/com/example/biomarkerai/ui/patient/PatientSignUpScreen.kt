@@ -174,10 +174,11 @@ fun PatientSignUpScreen(
                             try {
                                 val response = RetrofitClient.instance.register(
                                     RegisterRequest(
-                                        fullName = fullName,
+                                        username = email,
                                         email = email,
                                         password = password,
-                                        role = "patient"
+                                        role = "patient",
+                                        fullName = fullName
                                     )
                                 )
                                 if (response.isSuccessful) {

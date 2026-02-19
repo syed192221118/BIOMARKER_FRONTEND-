@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -98,11 +99,11 @@ fun AnalyticsScreen(
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Patient Risk Distribution", fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(24.dp))
-                    
+
                     // Donut Chart Mockup
                     Box(modifier = Modifier.size(200.dp).align(Alignment.CenterHorizontally)) {
                         Canvas(modifier = Modifier.fillMaxSize()) {
-                            drawArc(Color(0xFF00C853), -90f, 162f, false, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 30.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round))
+                            drawArc(Color(0xFF00C853), (-90).toFloat(), 162f, false, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 30.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round))
                             drawArc(Color(0xFFFFB300), 72f, 126f, false, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 30.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round))
                             drawArc(Color(0xFFFF5252), 198f, 72f, false, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 30.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round))
                         }
@@ -308,7 +309,7 @@ fun SettingsMenuItem(icon: ImageVector, title: String, subtitle: String) {
                 Text(title, fontWeight = FontWeight.SemiBold)
                 Text(subtitle, fontSize = 12.sp, color = Color.Gray)
             }
-            Icon(Icons.Default.KeyboardArrowRight, null, tint = Color.LightGray)
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, null, tint = Color.LightGray)
         }
     }
 }

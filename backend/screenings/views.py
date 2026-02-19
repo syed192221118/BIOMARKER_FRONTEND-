@@ -5,6 +5,8 @@ from .models import Screening
 from .serializers import ScreeningSerializer, BiomarkerPanelSerializer
 from accounts.permissions import IsDoctor, IsPatient
 from biomarkers.models import BiomarkerPanel
+from biomarker_backend.utils import audit_log
+from analysis.services import AIService
 
 class ScreeningViewSet(viewsets.ModelViewSet):
     serializer_class = ScreeningSerializer
@@ -20,9 +22,12 @@ class ScreeningViewSet(viewsets.ModelViewSet):
         return Screening.objects.none()
 
     def perform_create(self, serializer):
-        # TODO: Handle patient assignment logic if created by doctor
-        # For now assume mostly patient self-check or doctor creates for patient
-        serializer.save()
+        user = self.request.user
+        doctor = None
+        if user.role == 'doctor' and hasattr(user, 'doctor_profile'):
+            doctor = user.doctor_profile
+        
+        serializer.save(doctor=doctor)
 
     @action(detail=True, methods=['post'])
     def add_vitals(self, request, pk=None):
@@ -52,8 +57,11 @@ class ScreeningViewSet(viewsets.ModelViewSet):
         
         if serializer.is_valid():
             serializer.save(screening=screening)
-            screening.status = 'Pending_Analysis'
-            screening.save()
+            
+            # Trigger Automated Analysis and Reporting
+            AIService.run_full_analysis(screening)
+            
+            audit_log(request.user, "ADD_BIOMARKERS", f"Screening ID: {screening.id}")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

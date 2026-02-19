@@ -45,7 +45,7 @@ import java.io.File
 import java.io.FileOutputStream
 
 data class AssessmentData(
-    var age: String = "35", var gender: String = "Male", var height: String = "175", var weight: String = "70",
+    var patientName: String = "", var email: String = "", var age: String = "35", var gender: String = "Male", var height: String = "175", var weight: String = "70",
     var smokingStatus: String = "Never", var alcohol: String = "None", var sleep: String = "6-8 hrs", var physicalActivity: String = "Active",
     var systolic: String = "120", var diastolic: String = "80", var heartRate: String = "72", var waist: String = "85",
     var symptoms: Set<String> = emptySet(),
@@ -238,6 +238,8 @@ fun DemographicsStep(data: AssessmentData, onDataChange: (AssessmentData) -> Uni
     Column {
         Text("Basic Information", fontWeight = FontWeight.Bold, fontSize = 20.sp)
         Spacer(modifier = Modifier.height(24.dp))
+        LabField("Patient Name", data.patientName, { onDataChange(data.copy(patientName = it)) }, "")
+        LabField("Email Address", data.email, { onDataChange(data.copy(email = it)) }, "")
         LabField("Age", data.age, { onDataChange(data.copy(age = it)) }, "years")
         LabField("Gender", data.gender, { onDataChange(data.copy(gender = it)) }, "")
         LabField("Height", data.height, { onDataChange(data.copy(height = it)) }, "cm")
@@ -359,7 +361,7 @@ fun ReviewSummaryStep(data: AssessmentData, onEdit: (Int) -> Unit, onScreeningGu
     Column {
         Text("Summary", fontWeight = FontWeight.Bold, fontSize = 20.sp)
         Spacer(modifier = Modifier.height(8.dp)); Text("Please verify your information before proceeding to lab data.", fontSize = 14.sp, color = Color.Gray); Spacer(modifier = Modifier.height(24.dp))
-        ReviewSection("Demographics", "${data.gender}, ${data.age} yrs\n${data.height}cm, ${data.weight}kg", 1, onEdit)
+        ReviewSection("Demographics", "Name: ${data.patientName}\nEmail: ${data.email}\n${data.gender}, ${data.age} yrs\n${data.height}cm, ${data.weight}kg", 1, onEdit)
         ReviewSection("Lifestyle", "${data.smokingStatus}\n${data.alcohol}\n${data.sleep}", 2, onEdit)
         ReviewSection("History", (data.familyHistory + data.medicalHistory).joinToString("\n"), 3, onEdit)
         ReviewSection("Vitals", "BP: ${data.systolic}/${data.diastolic}\nHR: ${data.heartRate} bpm", 5, onEdit)
@@ -784,6 +786,10 @@ fun RiskBarItem(label: String, heightFractions: Float, color: Color) {
                         Text("Patient ID: #8492", color = Color.Gray, fontSize = 11.sp)
                     }
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Patient: ${data.patientName}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text("Email: ${data.email}", color = Color.Gray, fontSize = 12.sp)
                 
                 Spacer(modifier = Modifier.height(32.dp))
                 
@@ -877,9 +883,20 @@ fun generatePdf(context: Context, data: AssessmentData): File? {
     paint.color = android.graphics.Color.GRAY
     canvas.drawText("Metabolic Assessment Report - Oct 24, 2024", 40f, y, paint)
 
+    y += 40f
+    paint.color = android.graphics.Color.BLACK
+    paint.isFakeBoldText = true
+    canvas.drawText("Patient: ${data.patientName}", 40f, y, paint)
+    
+    y += 20f
+    paint.isFakeBoldText = false
+    paint.textSize = 12f
+    canvas.drawText("Email: ${data.email}", 40f, y, paint)
+
     y += 60f
     paint.color = android.graphics.Color.BLACK
     paint.isFakeBoldText = true
+    paint.textSize = 14f
     canvas.drawText("1. Summary", 40f, y, paint)
     y += 20f
     paint.isFakeBoldText = false

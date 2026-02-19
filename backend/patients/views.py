@@ -10,6 +10,8 @@ from screenings.serializers import ScreeningSerializer
 class PatientProfileViewSet(viewsets.ModelViewSet):
     serializer_class = PatientProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filterset_fields = ['gender', 'age']
+    search_fields = ['user__username', 'user__email', 'user__name']
 
     def get_queryset(self):
         user = self.request.user

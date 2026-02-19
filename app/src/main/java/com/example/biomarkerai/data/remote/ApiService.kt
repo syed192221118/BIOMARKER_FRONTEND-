@@ -51,4 +51,10 @@ interface ApiService {
         @Header("Authorization") token: String,
         @retrofit2.http.Path("id") id: Int
     ): retrofit2.Response<AIAnalysisResult>
+
+    @POST("analysis/predict/")
+    suspend fun analyze(
+        @Header("Authorization") token: String,
+        @Body request: AnalysisRequest
+    ): retrofit2.Response<AnalysisResponse>
 }

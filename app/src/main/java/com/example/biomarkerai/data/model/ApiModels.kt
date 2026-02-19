@@ -13,7 +13,8 @@ data class RegisterRequest(
     val email: String,
     val password: String,
     val role: String,
-    // Optional profile fields to be handled in 2nd step if needed, or ignored for now
+    @SerializedName("full_name") val fullName: String? = null,
+    val specialization: String? = null
 )
 
 data class TokenResponse(
@@ -94,3 +95,18 @@ data class AIAnalysisResult(
     @SerializedName("abnormal_markers") val abnormalMarkers: List<String>?
 )
 
+// Analysis missing models
+data class BiomarkerReadingInput(
+    @SerializedName("biomarker_id") val biomarkerId: Int,
+    val value: Float
+)
+
+data class AnalysisRequest(
+    val readings: List<BiomarkerReadingInput>
+)
+
+data class AnalysisResponse(
+    @SerializedName("metabolic_score") val metabolicScore: Int,
+    @SerializedName("risk_level") val riskLevel: String,
+    val insights: List<String>
+)

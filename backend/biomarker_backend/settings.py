@@ -10,22 +10,26 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables
+load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^4_o_(3a^uw2#x%h0xnb+dq8u2*acc@b^55-&rvb=yk!dw^zyh'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-^4_o_(3a^uw2#x%h0xnb+dq8u2*acc@b^55-&rvb=yk!dw^zyh')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 
 # Application definition
@@ -42,8 +46,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     # Local
-    # Local
-    # 'api',  # Removed
     'accounts',
     'patients',
     'screenings',
@@ -54,10 +56,11 @@ INSTALLED_APPS = [
     'django_celery_results',
     'drf_yasg',
     'rest_framework_simplejwt.token_blacklist',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware', # Check documentation for position
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -90,13 +93,73 @@ WSGI_APPLICATION = 'biomarker_backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+import dj_database_url
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL', f"sqlite:///{BASE_DIR}/db.sqlite3")
+    )
 }
 
+# Ensure MySQL connection settings are robust if using MySQL
+if 'mysql' in DATABASES['default']['ENGINE']:
+    DATABASES['default']['OPTIONS'] = {
+        'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        'charset': 'utf8mb4',
+    }
+
+
+# REST Framework configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+}
+
+
+# Medical Audit Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'medical_audit': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs/medical_audit.log',
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'medical.audit': {
+            'handlers': ['medical_audit', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
+# Ensure logs directory exists
+os.makedirs(BASE_DIR / 'logs', exist_ok=True)
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -133,6 +196,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Media files (User uploaded/generated files like PDF reports)
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Custom User Model
 AUTH_USER_MODEL = 'accounts.User'
@@ -140,14 +208,7 @@ AUTH_USER_MODEL = 'accounts.User'
 # CORS Settings
 CORS_ALLOW_ALL_ORIGINS = True # For development only
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
-}
+
 
 from datetime import timedelta
 SIMPLE_JWT = {
@@ -185,12 +246,12 @@ JAZZMIN_SETTINGS = {
     "site_title": "BiomarkerAI Admin",
     "site_header": "BiomarkerAI",
     "welcome_sign": "Welcome to BiomarkerAI Administration",
-    "search_model": ["api.User", "api.Patient"],
+    "search_model": ["accounts.User", "patients.PatientProfile"],
     "user_avatar": None,
     "topmenu_links": [
         {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
-        {"model": "api.User"},
-        {"app": "api"},
+        {"model": "accounts.User"},
+        {"app": "accounts"},
     ],
     "show_sidebar": True,
     "navigation_expanded": True,
@@ -198,12 +259,12 @@ JAZZMIN_SETTINGS = {
     "hide_models": [],
     "icons": {
         "auth": "fas fa-users-cog",
-        "api.User": "fas fa-user",
-        "api.Doctor": "fas fa-user-md",
-        "api.Patient": "fas fa-procedures",
-        "api.Screening": "fas fa-notes-medical",
-        "api.Biomarker": "fas fa-flask",
-        "api.AIResult": "fas fa-robot",
+        "accounts.User": "fas fa-user",
+        "accounts.DoctorProfile": "fas fa-user-md",
+        "patients.PatientProfile": "fas fa-procedures",
+        "screenings.Screening": "fas fa-notes-medical",
+        "biomarkers.BiomarkerPanel": "fas fa-flask",
+        "analysis.AIAnalysisResult": "fas fa-robot",
     },
     "default_icon_parents": "fas fa-chevron-circle-right",
     "default_icon_children": "fas fa-circle",

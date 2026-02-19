@@ -142,6 +142,7 @@ fun DoctorSignUpScreen(
                         try {
                             val response = RetrofitClient.instance.register(
                                 RegisterRequest(
+                                    username = email,
                                     email = email,
                                     password = password,
                                     role = "doctor",
